@@ -25,13 +25,13 @@ var socketHandler = function(socket) {
   // Send the list of active programs, when given a set of programs to search for
   // Could load the list of active programs from the settings files instead, as for now they won't change
   socket.on('active_programs', function(data, ret) {
-    console.log('retrieving active programs')
     // Search for the programs in data in the list of current tasks
     // Use the cached version of the list of current tasks
     var retData = {}    
 
     var taskMap = tasks.getTaskMap()
 
+    // TODO: Add a check to see if mixeres is iterable or not, as there's an error here
     // Iterate over all of the specified volume mixer's programs
     var mixers = volumeMixerData['volumeMixers']
     for(var slider of mixers) {
@@ -53,7 +53,6 @@ var socketHandler = function(socket) {
       }
     }
 
-    console.log(retData)
     ret(retData)
   })
 
@@ -94,7 +93,6 @@ var socketHandler = function(socket) {
     
   socket.on('set_volume', function(data) {
     var now = (new Date()).getTime()
-    console.log('set volume!')
     // console.log('Volume: ' + data.program + ': ' + (data.volume * 100) + ', Delay: ' + (now - data.time) + 'ms')
     // commands.saveDelay(now - data.time)
 
