@@ -27,33 +27,26 @@ var socketHandler = function(socket) {
   socket.on('active_programs', function(data, ret) {
     // Search for the programs in data in the list of current tasks
     // Use the cached version of the list of current tasks
-    var retData = {}    
 
-    var taskMap = tasks.getTaskMap()
+    var mixerDataInitialized = false
 
-    // TODO: Add a check to see if mixeres is iterable or not, as there's an error here
-    // Iterate over all of the specified volume mixer's programs
-    var mixers = volumeMixerData['volumeMixers']
-    for(var slider of mixers) {
-      var program = slider['programName']
-      var id = slider['id']
-      var isActive = false
+    if(Object.keys(volumeMixerData).length > 0) { // If the volume mixer data is loaded in
+      ret(getActivePrograms()) // Return the active programs immediately
 
-      if(program !== 'master-volume') { // Master-volume will never be in the list of current processes
-        // If current program is in the map of current tasks
-        if(taskMap.has(program)) { 
-          // Set it as an active task
-          isActive = true
-        }
+    } else { // If volumeMixerData isn't loaded in, check every 1/10th second if it is
+      console.log('Waiting for volumeMixerData')
+      setTimeout(function() {
+          if(Object.keys(volumeMixerData).length > 0) { // If the volume mixer data is loaded in
+            if(!mixerDataInitialized) { // And we haven't returned it yet
+              console.log('Volume mixer data retrieved, returning')
 
-        retData[id] = isActive
-      } else {
-        // master-volume will always be active
-        retData['master-volume'] = true
-      }
+              ret(getActivePrograms())
+
+              mixerDataInitialized = true
+            }
+          }
+      }, 200)
     }
-
-    ret(retData)
   })
 
   // Change the current audio device
@@ -104,6 +97,34 @@ var socketHandler = function(socket) {
   // return router
 }
 
+function getActivePrograms() {
+  // Iterate over all of the specified volume mixer's programs
+  var retData = {}
+  var taskMap = tasks.getTaskMap()
+
+  var mixers = volumeMixerData['volumeMixers']
+  for(var slider of mixers) {
+    var program = slider['programName']
+    var id = slider['id']
+    var isActive = false
+
+    if(program !== 'master-volume') { // Master-volume will never be in the list of current processes
+      // If current program is in the map of current tasks
+      if(taskMap.has(program)) { 
+        // Set it as an active task
+        isActive = true
+      }
+
+      retData[id] = isActive
+    } else {
+      // master-volume will always be active
+      retData['master-volume'] = true
+    }
+  }
+
+  return retData
+}
+
 // Keep on Desktop
 function getPerformanceUsage() {
   var data = {}
@@ -114,12 +135,14 @@ function getPerformanceUsage() {
 }
 
 function loadVolumeMixerData() {
-    communication.getVolumeMixerData().then((data) => {
-        volumeMixerData = data
+  console.log('Attempting to get volumeMixerData')
+  communication.getVolumeMixerData().then((data) => {
+    console.log('Retrieved volumeMixerData')
+    volumeMixerData = data
 
-    }).catch((error) => {
-        console.log(error)
-    })
+  }).catch((error) => {
+      console.log(error)
+  })
 }
 
 function loadVolumeData() {
