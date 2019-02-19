@@ -1,9 +1,9 @@
 // Defines how the raspberry pi server and this server communicate
 
 const commands = require('./commands.js')
+const settings = require('../settings.js')
 
-var client = require('socket.io-client')('http://localhost:3000')
-
+var client = require('socket.io-client')('http://' + settings.settings['tablet-ip'] + ':3000')
 
 var socketHandler = function(socket) {
     socket.on('current_audio_device', function(data, ret) {
