@@ -1,4 +1,4 @@
-var express = require('express')
+const express = require('express')
 var router = express.Router()
 var fs = require('fs')
 var bodyParser = require('body-parser') // for parsing basic request data?
@@ -12,12 +12,13 @@ var tasks = require('./tasks.js')
 
 var volumes = {};
 loadVolumeData()
-//var volumeData = JSON.parse(fs.readFileSync('./public/volumeData.json', 'utf-8'))
-//var settingsData = JSON.parse(fs.readFileSync('./view-settings.json'), 'utf-8')
+// var volumeData = JSON.parse(fs.readFileSync('./public/volumeData.json', 'utf-8'))
+// var settingsData = JSON.parse(fs.readFileSync('./view-settings.json'), 'utf-8')
+
 var volumeMixerData = {}
 loadVolumeMixerData()
 
-//var currentAudioDevice = settingsData['audioDevices'][0]
+// var currentAudioDevice = settingsData['audioDevices'][0]
 var currentAudioDevice = 'DAC'
 
 // Handle socket messages
@@ -30,13 +31,17 @@ var socketHandler = function(socket) {
 
     var mixerDataInitialized = false
 
-    if(Object.keys(volumeMixerData).length > 0) { // If the volume mixer data is loaded in
+    if(isLoaded(volumeMixerData)) { // If the volume mixer data is loaded in
       ret(getActivePrograms()) // Return the active programs immediately
 
+      mixerDataInitialized = true      
     } else { // If volumeMixerData isn't loaded in, check every 1/10th second if it is
       console.log('Waiting for volumeMixerData')
+      loadVolumeMixerData() // Attempt to load in the volume mixer data since it isn't loaded in yet
+
       setTimeout(function() {
-          if(Object.keys(volumeMixerData).length > 0) { // If the volume mixer data is loaded in
+          if(isLoaded(volumeMixerData)) { // If the volume mixer data is loaded in
+            console.log('Volume mixer data loaded')
             if(!mixerDataInitialized) { // And we haven't returned it yet
               console.log('Volume mixer data retrieved, returning')
 
@@ -44,7 +49,10 @@ var socketHandler = function(socket) {
 
               mixerDataInitialized = true
             }
+          } else {
+            ret(null)
           }
+
       }, 200)
     }
   })
@@ -89,8 +97,11 @@ var socketHandler = function(socket) {
     // console.log('Volume: ' + data.program + ': ' + (data.volume * 100) + ', Delay: ' + (now - data.time) + 'ms')
     // commands.saveDelay(now - data.time)
 
-    volumes[currentAudioDevice][data.program] = data.volume;
-    
+    if(isLoaded(volumes)) {
+      volumes[currentAudioDevice][data.program] = data.volume;
+    }
+   
+    // Regardless, set the volume?
     // Run a command to set the volume for the given program
     commands.setVolume(data.program, data.volume)
   })
@@ -146,9 +157,16 @@ function loadVolumeMixerData() {
 }
 
 function loadVolumeData() {
-    communication.getVolumeData().then((data) => {
-        volumes = data
-    })
+  console.log('Attempting to get volume data')
+  communication.getVolumeData().then((data) => {
+    console.log('Retrieved volume data!') 
+    volumes = data
+  })
+}
+
+// Returns true if the dicationary isn't empty
+function isLoaded(dict) {
+  return Object.keys(dict).length > 0
 }
 
 // Settings(and all exports) are references, and thus change as they're updated
