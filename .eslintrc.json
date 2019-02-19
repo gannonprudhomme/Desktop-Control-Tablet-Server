@@ -4,7 +4,6 @@
         "es6": true,
         "node": true
     },
-    "extends": "google",
     "globals": {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
@@ -13,5 +12,7 @@
         "ecmaVersion": 2018
     },
     "rules": {
+        "no-var": 0,
+        "linebreak-style": "off"
     }
 }
