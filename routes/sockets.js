@@ -6,7 +6,10 @@ var router = express.Router()
 
 var returnRouter = function(io) {
     io.on('connection', function(socket) {
-        console.log('connection!')
+        var socketId = socket.id
+        var clientIP = socket.request.connection.remoteAddress
+        console.log('connection from ' + clientIP)
+
         handleDesktop.socketHandler(socket)
         handleCommunication.socketHandler(socket)
     })
