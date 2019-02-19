@@ -14,7 +14,7 @@ app.use(socket)
 
 server.listen(port, (err) => {
     if(err) {
-        return console.log("something bad happened")
+        return console.log('something bad happened')
     }
 
     console.log(`server is listening on port ${port}`)
