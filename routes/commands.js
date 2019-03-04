@@ -8,7 +8,7 @@ function setVolume(program, volume) {
     exec('nircmd setvolume 0 ' + parseInt(volume * 65535) + ' ' + parseInt(volume * 65535))
 
   } else {
-    exec('nircmd true setappvolume ' + program + ' ' + volume)
+    exec('nircmd true setappvolume \"' + program + '\" ' + volume)
   }
 }
 
