@@ -26,8 +26,15 @@ public class Startup {
     public async Task<object> Invoke(object input) {
         var ret = "";
         var path = input.ToString();
+        HashSet<int> set = new HashSet<int>();
         foreach (AudioSession session in AudioUtilities.GetAllSessions()) {
             if (session.Process != null) {
+                // Skip multiple of the same process id's
+                if (set.Contains(session.ProcessId)) {
+                    continue;
+                }
+                set.Add(session.ProcessId);
+
                 Icon thing = null;
                 // Console.WriteLine(ProcessUtilties.processToString(session.Process));
                 ret += ProcessUtilties.processToString(session.Process) + "\n";
