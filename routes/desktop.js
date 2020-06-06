@@ -105,6 +105,33 @@ var socketHandler = function(socket) {
     // Run a command to set the volume for the given program
     commands.setVolume(data.program, data.volume)
   })
+
+  socket.on('set_volume_proc', (data) => {
+    const { pid, volume } = data;
+    commands.setVolume2(pid, volume);
+  });
+
+  socket.on('get_volumes', function(data, ret) {
+    commands.getProcessVolumes().then((procs) => {
+      ret(procs);
+    }).catch((err) => {
+      console.log('get_volumes error!');
+      console.log(err);
+    })
+  });
+
+  socket.on('get_volume_icon', (data, ret) => {
+    const name = data;
+
+    const file = fs.readFile(path.join(__dirname, `../icons/${name}.png`), (err, data) => {
+      if (err) {
+        console.log(err);
+      }
+
+      ret(data);
+    });
+  });
+
   // return router
 }
 

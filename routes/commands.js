@@ -1,5 +1,7 @@
 var {exec} = require('child_process')
+const path = require('path');
 var fs = require('fs')
+const desktopScripts = require('../desktop-scripts');
 
 function setVolume(program, volume) {
   if(program === 'master-volume') {
@@ -12,12 +14,56 @@ function setVolume(program, volume) {
   }
 }
 
+// Altenrative to setting the process volume
+function setVolume2(pid, volume) {
+  if (pid === -1) { // master volume
+  } else {
+    desktopScripts.setProcessVolume(`setprocessvolume ${pid} ${volume}`);
+  }
+}
+
 function sendKeypress(keys) {
   exec('nircmd sendkeypress ' + keys)
 }
 
 function changeAudioOutput(device) {
   exec('nircmd setdefaultsounddevice \"' + device + '\"')
+}
+
+/**
+ * Retrieve all of the currently running processes that have volume control
+ */
+function getProcessVolumes() {
+  return new Promise((resolve, reject) => {
+    // TODO: Add a timeout to this and reject it at some point
+    // Also we need to remove this handler once it's added
+    desktopScripts.getAllProcesses('./icons/', (err, message) => {
+      if (err) throw err;
+
+      const lines = message.split(/\r?\n/); // Need to remove an empty line from this
+      
+      const ret = []; // Array of objects, with each having a pid, name, and volume
+
+      // Each line is formatted like "{pid} {procName} {volume}", where volume is [0, 100]
+      lines.forEach((line, idx) => {
+        if (line.length == 0) {
+          return; // Skip empty lines
+        }
+
+        const lineSplit = line.split(/\s/); // Split by spaces
+
+        const pid = Number(lineSplit[0]);
+        const name = lineSplit[1];
+        const volume = Number(lineSplit[2]);
+
+        ret.push({
+          pid, name, volume,
+        })
+      });
+
+      resolve(ret);
+    });
+  });
 }
 
 var stream = fs.createWriteStream('delays.txt', {flags:'a'})
@@ -31,6 +77,8 @@ function addTwoNumbers(a, b) {
 
 module.exports.addTwoNumbers = addTwoNumbers
 module.exports.setVolume = setVolume
+module.exports.setVolume2 = setVolume2
 module.exports.sendKeypress = sendKeypress
 module.exports.saveDelay = saveDelay
 module.exports.changeAudioOutput = changeAudioOutput
+module.exports.getProcessVolumes = getProcessVolumes
