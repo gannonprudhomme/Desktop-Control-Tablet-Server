@@ -74,7 +74,7 @@ public static class ProcessUtilties {
     // For getallprocesses
     public static string processToString(Process process) {
         // return process.Id + " " + process.ProcessName + " '" + process.MainWindowTitle + "' " + VolumeUtilities.GetApplicationVolume(process.Id);
-        return process.Id + " " + process.ProcessName + " " + VolumeUtilities.GetApplicationVolume(process.Id);
+        return process.Id + " \"" + process.ProcessName + "\" " + VolumeUtilities.GetApplicationVolume(process.Id);
     }
 }
 

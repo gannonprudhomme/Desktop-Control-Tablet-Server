@@ -50,7 +50,13 @@ function getProcessVolumes() {
           return; // Skip empty lines
         }
 
-        const lineSplit = line.split(/\s/); // Split by spaces
+        // Example line: '12136 "Program Name"  100
+        // Splits the line by either _" or "_ - where underscore is a space
+        // This makes it so that between the start & the first _" it's the PID, then from after the
+        // _" to the "_ (inside of the quotes) is the program name, then the rest is the volume.
+        // This allows us to handle spaces in program names (thanks Beat Saber)
+        const lineSplit = line.split(/(?:(?:\s")|(?:"\s))/);
+
 
         const pid = Number(lineSplit[0]);
         const name = lineSplit[1];
