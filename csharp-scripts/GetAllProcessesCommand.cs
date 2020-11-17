@@ -64,7 +64,23 @@ public static class ProcessUtilties {
     ///</summary>
     public static void SaveIconForSession(AudioSession session, string path = "./") {
         Process process = session.Process;
-        Icon icon = getProcessIcon(process);
+        Icon icon = null;
+        // 64-bit processes will throw a Win32Exception when trying to access their icon,
+        // so catch it
+        try {
+            icon = getProcessIcon(process);
+        } catch (Exception e) {
+            // TODO: Actually retrieve the icon for a 64-bit process
+            if (e is ArgumentException || e is Win32Exception) {
+                icon = Icon.FromHandle(SystemIcons.Application.Handle);
+            }
+        }
+
+        // This block probably won't ever get caught (b/c of the above try-catch)
+        if (icon == null) {
+            Console.WriteLine("Icon is null for " + session);
+            icon = Icon.FromHandle(SystemIcons.Application.Handle);
+        }
 
         using (FileStream fs = new FileStream(path + process.ProcessName + ".png", FileMode.Create)) {
             icon.ToBitmap().Save(fs, ImageFormat.Png);
