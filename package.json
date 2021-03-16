@@ -19,6 +19,7 @@
   "homepage": "https://github.com/gannonprudhomme/Desktop-Control-Tablet-Server#readme",
   "dependencies": {
     "body-parser": "^1.18.3",
+    "command-exists": "^1.2.9",
     "edge-js": "^13.0.1",
     "express": "^4.16.4",
     "os-utils": "0.0.14",

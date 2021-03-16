@@ -1,7 +1,15 @@
-var {exec} = require('child_process')
-const path = require('path');
-var fs = require('fs')
+const { exec } = require('child_process')
+const fs = require('fs')
+const commandExistsSync = require('command-exists').sync; // Note that this is synchronous
 const desktopScripts = require('../desktop-scripts');
+const { exit } = require('process');
+
+function checkNirCmdExists() {
+  if (!commandExistsSync('nircmd')) {
+    console.log("ERROR: nircmd does not exist in PATH. Either update your path or download it from https://nirsoft.net/utils/nircmd.html/")
+    exit(1);
+  }
+}
 
 function setVolume(program, volume) {
   if(program === 'master-volume') {
@@ -23,6 +31,7 @@ function setVolume2(pid, volume) {
 }
 
 function sendKeypress(keys) {
+  checkNirCmdExists();
   exec('nircmd sendkeypress ' + keys)
 }
 
