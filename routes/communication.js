@@ -23,7 +23,11 @@ function getVolumeMixerData() {
     })    
 }
 
+/**
+ * called by desktop.loadVolumeData(), which sets volumes 
+ */
 function getVolumeData() {
+    // Shouldn't be called anymore
     return new Promise((resolve, reject) => {
         client.emit('volume_data', '', function(data) {
             resolve(data)
