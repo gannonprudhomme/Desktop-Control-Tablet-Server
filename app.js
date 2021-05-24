@@ -6,7 +6,7 @@ const app = express()
 const port = 3001
 
 var server = http.createServer(app)
-var io = require('socket.io').listen(server)
+var io = require('socket.io')(server, {});
 
 var socket = require('./routes/sockets.js')(io)
 
