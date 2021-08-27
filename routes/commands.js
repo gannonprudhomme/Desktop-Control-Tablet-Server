@@ -47,7 +47,11 @@ function getProcessVolumes() {
     // TODO: Add a timeout to this and reject it at some point
     // Also we need to remove this handler once it's added
     desktopScripts.getAllProcesses('./icons/', (err, message) => {
-      if (err) throw err;
+      if (err) {
+        console.error(err);
+        resolve([]);
+        return;
+      };
 
       const lines = message.split(/\r?\n/); // Need to remove an empty line from this
       
